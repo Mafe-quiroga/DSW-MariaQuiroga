@@ -1,0 +1,26 @@
+header{
+    background-color: aquamarine;
+}
+
+nav{
+    background-color: salmon;
+}
+section{
+    float: left;
+    max-width: 70%;
+    background-color: seashell;
+}
+article{
+    float: left;
+    max-width: 30%;
+    background-color: cyan;
+}
+
+footer{
+   background-color: navajowhite;
+}
+.contenedor::after{
+    content: "";
+    display: block;
+    clear: both;
+}
