@@ -1,26 +1,32 @@
 header{
-    background-color: aquamarine;
+    background-color:dodgerblue;
+    text-align: center;
+    padding: 20px;
+    
 }
 
 nav{
-    background-color: salmon;
+    background-color:hotpink;
 }
 section{
-    float: left;
-    max-width: 70%;
+    grid-column: 1/2;
     background-color: seashell;
 }
-article{
-    float: left;
-    max-width: 30%;
-    background-color: cyan;
+aside{
+    grid-column: 2/3;
+    background-color:mediumpurple;
+}
+article{ 
+    background-color:deepskyblue;
 }
 
 footer{
-   background-color: navajowhite;
+   background-color:black;
+   color: white;
+   padding: 10px;
+   text-align: center;
 }
-.contenedor::after{
-    content: "";
-    display: block;
-    clear: both;
+.contenedor{
+    display: grid;
+    grid-template-columns: 70% 30%;
 }
