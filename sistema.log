@@ -1,0 +1,14 @@
+2026-11-10 23:45:23,812 - INFO - Operación 1 exitosa: Cliente registrado.
+2026-11-10 23:45:23,812 - WARNING - Operación 2 manejada correctamente: Nombre de cliente inválido: 'Jo'. Debe tener al menos 3 caracteres.
+2026-11-10 23:45:23,812 - INFO - Operación 3 exitosa: Servicio de sala creado.
+2026-11-10 23:45:23,812 - WARNING - Operación 4 manejada correctamente: El costo base no puede ser negativo: -100.0
+2026-11-10 23:45:23,813 - INFO - Operación 5 exitosa: Alquiler de equipo creado.
+2026-11-10 23:45:23,813 - INFO - Operación 6 exitosa: Asesoría creada.
+2026-11-10 23:45:23,813 - INFO - Iniciando procesamiento de reserva R001
+2026-11-10 23:45:23,813 - INFO - Reserva R001 confirmada con éxito por un valor de $190400.00
+2026-11-10 23:45:23,814 - INFO - Iniciando procesamiento de reserva R002
+2026-11-10 23:45:23,814 - ERROR - Error controlado en reserva R002: Error al calcular costo de sala ID S100
+2026-11-10 23:45:23,814 - INFO - Iniciando procesamiento de reserva R003
+2026-11-10 23:45:23,814 - INFO - Reserva R003 confirmada con éxito por un valor de $157500.00
+2026-11-10 23:45:23,814 - INFO - Iniciando procesamiento de reserva R004
+2026-11-10 23:45:23,815 - INFO - Reserva R004 confirmada con éxito por un valor de $300000.00
