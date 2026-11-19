@@ -149,7 +149,20 @@ class ReservaSalas(Servicio):
 
   def __init__(self, identificador: str, costo_base: float, capacidad: int):
     super().__init__(identificador, "Reserva de Salas", costo_base)
+   if not isinstance(capacidad, int) or isinstance(capacidad, bool) or capacidad <= 0:
+    raise ServicioNoDisponibleError(
+        "La capacidad de la sala debe ser un número entero mayor que cero."
+    )
+
     self.capacidad = capacidad
+  def obtener_detalles(self) -> str:
+        return (
+            f"Servicio: {self.nombre_servicio} - "
+            f"ID: {self.identificador} - "
+            f"Capacidad: {self.capacidad} personas - "
+            f"Costo base: ${self.costo_base:.2f}"
+        )
+       
 
   def calcular_costo(self, horas: int, aplicar_impuesto: bool = True) -> float:
     try:
@@ -170,7 +183,19 @@ class AlquilerEquipos(Servicio):
 
   def __init__(self, identificador: str, costo_base: float, tipo_equipo: str):
     super().__init__(identificador, "Alquiler de Equipos", costo_base)
-    self.tipo_equipo = tipo_equipo
+   if not isinstance(tipo_equipo, str) or not tipo_equipo.strip():
+    raise ServicioNoDisponibleError(
+        "Debe indicar un tipo de equipo válido."
+    )
+
+self.tipo_equipo = tipo_equipo.strip()
+  def obtener_detalles(self) -> str:
+    return (
+      f"Servicio: {self.nombre_servicio} - "
+      f"ID: {self.identificador} - "
+      f"Tipo de equipo: {self.tipo_equipo} - "
+      f"Costo base: ${self.costo_base:.2f}"
+    )
 
   # Método sobrecargado mediante argumentos opcionales / kwargs
   def calcular_costo(self, dias: int, descuento: float = 0.0) -> float:
@@ -191,7 +216,19 @@ class AsesoriasEspecializadas(Servicio):
 
   def __init__(self, identificador: str, costo_base: float, especialista: str):
     super().__init__(identificador, "Asesorías Especializadas", costo_base)
-    self.especialista = especialista
+    if not isinstance(especialista, str) or not especialista.strip():
+      raise ServicioNoDisponibleError(
+        "Debe indicar el nombre de un especialista válido."
+    )
+
+    self.especialista = especialista.strip()
+  def obtener_detalles(self) -> str:
+    return (
+      f"Asesoría: {self.nombre_servicio} - "
+      f"ID: {self.identificador} - "
+      f"Especialista: {self.especialista} - "
+      f"Costo base: ${self.costo_base:.2f}"
+    )
 
   def calcular_costo(
       self, sesiones: int, tarifa_plena: bool = True
@@ -220,6 +257,39 @@ class Reserva:
     self.parametro_uso = parametro_uso
     self.estado = "Creada"
     self.costo_calculado = 0.0
+      def confirmar_reserva(self):
+    """Confirma una reserva que todavía está creada."""
+    try:
+      if self.estado != "Creada":
+        raise ReservaFallidaError(
+            f"No se puede confirmar la reserva porque está en estado: {self.estado}"
+        )
+
+      self.procesar_reserva()
+      return self.estado == "Confirmada"
+
+    except ReservaFallidaError as e:
+      logging.error(f"Error al confirmar reserva {self.id_reserva}: {e}")
+      print(f"No se pudo confirmar la reserva: {e}")
+      return False
+
+  def cancelar_reserva(self):
+    """Cancela una reserva creada o confirmada."""
+    try:
+      if self.estado not in ("Creada", "Confirmada"):
+        raise ReservaFallidaError(
+            f"No se puede cancelar una reserva en estado: {self.estado}"
+        )
+
+      self.estado = "Cancelada"
+      logging.info(f"Reserva {self.id_reserva} cancelada correctamente.")
+      print(f"Reserva {self.id_reserva} cancelada.")
+      return True
+
+    except ReservaFallidaError as e:
+      logging.error(f"Error al cancelar reserva {self.id_reserva}: {e}")
+      print(f"No se pudo cancelar la reserva: {e}")
+      return False
 
   def procesar_reserva(self):
     # Uso de bloques try/except/else/finally exigidos por la guía
@@ -258,17 +328,65 @@ class Reserva:
       # Se ejecuta siempre, ideal para cierres o registros de cierre de operación
       print(f"-> Finalizó intento de procesamiento para la reserva {self.id_reserva}.\n")
 
+# ==========================================
+# CLASE PARA ADMINISTRAR LAS LISTAS INTERNAS
+# ==========================================
+class SistemaFJ:
+    def __init__(self):
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
 
+    def registrar_cliente(self, cliente):
+        if not isinstance(cliente, Cliente):
+            raise ClienteInvalidoError("El cliente no es válido.")
+
+        if any(c.identificador == cliente.identificador
+               for c in self.clientes):
+            raise ClienteInvalidoError("El cliente ya está registrado.")
+
+        self.clientes.append(cliente)
+        logging.info("Cliente registrado en el sistema.")
+
+    def registrar_servicio(self, servicio):
+        if not isinstance(servicio, Servicio):
+            raise ServicioNoDisponibleError("El servicio no es válido.")
+
+        if any(s.identificador == servicio.identificador
+               for s in self.servicios):
+            raise ServicioNoDisponibleError("El servicio ya está registrado.")
+
+        self.servicios.append(servicio)
+        logging.info("Servicio registrado en el sistema.")
+
+    def registrar_reserva(self, reserva):
+        if not isinstance(reserva, Reserva):
+            raise ReservaFallidaError("La reserva no es válida.")
+
+        if not any(c is reserva.cliente for c in self.clientes):
+            raise ReservaFallidaError("El cliente no está registrado.")
+
+        if not any(s is reserva.servicio for s in self.servicios):
+            raise ReservaFallidaError("El servicio no está registrado.")
+
+        if any(r.id_reserva == reserva.id_reserva
+               for r in self.reservas):
+            raise ReservaFallidaError("La reserva ya está registrada.")
+
+        self.reservas.append(reserva)
+        logging.info("Reserva registrada en el sistema.")
 # ==========================================
 # SIMULACIÓN DE 10 OPERACIONES (EXIGENCIA GUÍA)
 # ==========================================
 def ejecutar_simulacion():
-  print("=== INICIANDO SIMULACIÓN DE 10 OPERACIONES DE SOFTWARE FJ ===\n")
+   sistema = SistemaFJ()
+    print("=== INICIANDO SIMULACIÓN DE 10 OPERACIONES DE SOFTWARE FJ ===\n")
 
   # Operación 1: Registro de cliente válido
   print("--- Operación 1: Registro de Cliente Válido ---")
   try:
     c1 = Cliente("C001", "Ana María Gómez", "ana.gomez@unad.edu.co", "3104567890")
+    sistema.registrar_cliente(c1)
     print(c1.obtener_detalles())
     logging.info("Operación 1 exitosa: Cliente registrado.")
   except Exception as e:
@@ -288,6 +406,7 @@ def ejecutar_simulacion():
   print("--- Operación 3: Creación de Servicio (Reserva de Salas) ---")
   try:
     sala1 = ReservaSalas("S001", 50000.0, 20)
+      sistema.registrar_servicio(sala1)
     print(sala1.obtener_detalles())
     logging.info("Operación 3 exitosa: Servicio de sala creado.")
   except Exception as e:
@@ -307,6 +426,7 @@ def ejecutar_simulacion():
   print("--- Operación 5: Creación de Alquiler de Equipos ---")
   try:
     equipo1 = AlquilerEquipos("E001", 35000.0, "Portátil Core i7")
+    sistema.registrar_servicio(equipo1)
     print(equipo1.obtener_detalles())
     logging.info("Operación 5 exitosa: Alquiler de equipo creado.")
   except Exception as e:
@@ -317,6 +437,7 @@ def ejecutar_simulacion():
   print("--- Operación 6: Creación de Asesoría Especializada ---")
   try:
     asesoria1 = AsesoriasEspecializadas("A001", 120000.0, "Dr. Carlos Pérez")
+    sistema.registrar_servicio(asesoria1)
     print(asesoria1.obtener_detalles())
     logging.info("Operación 6 exitosa: Asesoría creada.")
   except Exception as e:
@@ -327,8 +448,11 @@ def ejecutar_simulacion():
   print("--- Operación 7: Reserva Exitosa de Sala ---")
   try:
     cli_val = Cliente("C003", "Pedro Picapiedra", "pedro@stone.com", "3201234567")
+    sistema.registrar_cliente(cli_val)
     sala_val = ReservaSalas("S100", 40000.0, 15)
+    sistema.registrar_servicio(sala_val)
     reserva1 = Reserva("R001", cli_val, sala_val, 4) # 4 horas
+    sistema.registrar_reserva(reserva1)
     reserva1.procesar_reserva()
   except Exception as e:
     print(f"Error en simulación 7: {e}")
@@ -347,8 +471,9 @@ def ejecutar_simulacion():
   print("--- Operación 9: Reserva de Equipos Exitosa ---")
   try:
     reserva3 = Reserva("R003", cli_val, equipo1, 5) # 5 días
+    sistema.registrar_reserva(reserva3)
     reserva3.procesar_reserva()
-  except Exception as e:
+except Exception as e:
     print(f"Error: {e}")
   print("-" * 50)
 
@@ -356,6 +481,7 @@ def ejecutar_simulacion():
   print("--- Operación 10: Reserva de Asesoría Exitosa ---")
   try:
     reserva4 = Reserva("R004", cli_val, asesoria1, 2) # 2 sesiones
+    sistema.registrar_reserva(reserva4)
     reserva4.procesar_reserva()
   except Exception as e:
     print(f"Error: {e}")
