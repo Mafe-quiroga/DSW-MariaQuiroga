@@ -155,7 +155,7 @@ class ReservaSalas(Servicio):
     )
 
     self.capacidad = capacidad
-        def obtener_detalles(self) -> str:
+  def obtener_detalles(self) -> str:
         return (
             f"Servicio: {self.nombre_servicio} - "
             f"ID: {self.identificador} - "
